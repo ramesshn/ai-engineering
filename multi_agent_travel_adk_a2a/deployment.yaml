@@ -1,0 +1,52 @@
+# This YAML file is used to deploy the ADK agent on a Kubernetes cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adk-multi-agent-travel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adk-multi-agent-travel
+  template:
+    metadata:
+      labels:
+        app: adk-multi-agent-travel
+    spec:
+      serviceAccount: adk-multi-agent-travel-sa
+      containers:
+      - name: adk-multi-agent-travel
+        image: us-central1-docker.pkg.dev/ramesh-ai-project-457712/adk-repo/adk-multi-agent-travel:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+            ephemeral-storage: "128Mi"
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
+            ephemeral-storage: "128Mi"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: PORT
+            value: "8080"
+          - name: GOOGLE_CLOUD_PROJECT
+            value: ramesh-ai-project-457712
+          - name: GOOGLE_CLOUD_LOCATION
+            value: us-central1
+          - name: GOOGLE_GENAI_USE_VERTEXAI
+            value: "true"
+          # Add any other necessary environment variables your agent might need
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adk-multi-agent-travel
+spec:       
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: adk-multi-agent-travel
